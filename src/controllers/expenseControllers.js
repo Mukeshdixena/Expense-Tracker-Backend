@@ -3,7 +3,7 @@ const expense = require('../models/expense');
 exports.getExpense = (req, res, next) => {
     expense.findAll()
         .then(expense => {
-            res.status(200).json({ message: 'Fetched expense successfully!', data: expense });
+            res.status(200).json(expense);
         })
         .catch(err => {
             console.error(err);
@@ -18,7 +18,7 @@ exports.postExpense = (req, res, next) => {
         amount: amount
     })
         .then(result => {
-            res.status(201).json({ message: 'expense created successfully!', data: result });
+            res.status(201).json(result);
         })
         .catch(err => {
             console.error(err);
@@ -27,7 +27,7 @@ exports.postExpense = (req, res, next) => {
 };
 
 exports.deleteExpense = (req, res, next) => {
-    const { expenseId } = req.body;
+    const { expenseId } = req.params;
 
     if (!expenseId) {
         return res.status(400).json({ message: 'expenseId is required' });
