@@ -50,3 +50,27 @@ exports.deleteExpense = (req, res, next) => {
             res.status(500).json({ message: 'Error deleting expense', error: err });
         });
 };
+
+exports.editExpense = (req, res, next) => {
+    const { editId } = req.params;
+    const { description, amount } = req.body;
+
+    if (!editId) {
+        return res.status(400).json({ message: 'editId is required' });
+    }
+
+    expense.findByPk(editId)
+        .then(expense => {
+            if (!expense) {
+                return res.status(404).json({ message: 'Expense not found' });
+            }
+            return expense.update({ description, amount });
+        })
+        .then(updatedExpense => {
+            res.status(200).json({ message: 'Expense updated successfully', expense: updatedExpense });
+        })
+        .catch(err => {
+            console.error('Error updating expense:', err);
+            res.status(500).json({ message: 'Error updating expense', error: err });
+        });
+};
