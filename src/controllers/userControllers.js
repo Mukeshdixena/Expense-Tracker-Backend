@@ -1,5 +1,5 @@
 const user = require('../models/user');
-
+const bcrypt = require('bcryptjs');
 exports.getUser = (req, res, next) => {
     user.findAll()
         .then(user => {
@@ -11,22 +11,26 @@ exports.getUser = (req, res, next) => {
         });
 };
 
-exports.postUser = (req, res, next) => {
-    const { username, email, password } = req.body;
-    user.create({
-        username: username,
-        email: email,
-        password: password
-    })
-        .then(result => {
-            res.status(201).json(result);
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ message: 'Something went wrong!' });
-        });
-};
+exports.postUser = async (req, res, next) => {
+    try {
+        const { username, email, password } = req.body;
 
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user
+        const newUser = await user.create({
+            username,
+            email,
+            password: hashedPassword
+        });
+
+        res.status(201).json(newUser);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+};
 exports.deleteUser = (req, res, next) => {
     const { userId } = req.params;
 
@@ -78,7 +82,6 @@ exports.editUser = (req, res, next) => {
 
 exports.signin = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password)
 
     try {
         const currUser = await user.findOne({ where: { email } });
@@ -86,7 +89,9 @@ exports.signin = async (req, res) => {
             return res.json({ success: false, message: 'Email not found' });
         }
 
-        if (currUser.password !== password) {
+        // Compare password
+        const isMatch = await bcrypt.compare(password, currUser.password);
+        if (!isMatch) {
             return res.json({ success: false, message: 'Incorrect password' });
         }
 
