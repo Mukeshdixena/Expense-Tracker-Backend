@@ -28,8 +28,8 @@ app.get("/", (req, res) => {
 });
 
 sequelize
-    // .sync({ force: true })
-    .sync()
+    .sync({ force: true })
+    // .sync()
     .then(result => {
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);

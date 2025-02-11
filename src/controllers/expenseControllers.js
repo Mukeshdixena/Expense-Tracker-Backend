@@ -12,10 +12,11 @@ exports.getExpense = (req, res, next) => {
 };
 
 exports.postExpense = (req, res, next) => {
-    const { description, amount } = req.body;
+    const { description, amount, category } = req.body;
     expense.create({
         description: description,
-        amount: amount
+        amount: amount,
+        category: category
     })
         .then(result => {
             res.status(201).json(result);
@@ -53,7 +54,7 @@ exports.deleteExpense = (req, res, next) => {
 
 exports.editExpense = (req, res, next) => {
     const { editId } = req.params;
-    const { description, amount } = req.body;
+    const { description, amount, category } = req.body;
 
     if (!editId) {
         return res.status(400).json({ message: 'editId is required' });
@@ -64,7 +65,7 @@ exports.editExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'Expense not found' });
             }
-            return expense.update({ description, amount });
+            return expense.update({ description, amount, category });
         })
         .then(updatedExpense => {
             res.status(200).json({ message: 'Expense updated successfully', expense: updatedExpense });

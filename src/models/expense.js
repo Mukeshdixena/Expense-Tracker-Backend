@@ -19,7 +19,11 @@ const Expense = sequelize.define(
         amount: {
             type: Sequelize.INTEGER,
             allowNull: false,
-        }
+        },
+        category: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
     }
 );
 
