@@ -75,3 +75,24 @@ exports.editUser = (req, res, next) => {
             res.status(500).json({ message: 'Error updating user', error: err });
         });
 };
+
+exports.signin = async (req, res) => {
+    const { email, password } = req.body;
+    console.log(email, password)
+
+    try {
+        const currUser = await user.findOne({ where: { email } });
+        if (!currUser) {
+            return res.json({ success: false, message: 'Email not found' });
+        }
+
+        if (currUser.password !== password) {
+            return res.json({ success: false, message: 'Incorrect password' });
+        }
+
+        res.json({ success: true, message: 'Login successful' });
+    } catch (error) {
+        console.error('Error during signin:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
