@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
+const user = require('./models/user.js')
+const expense = require('./models/expense.js')
 
 
 app.use(cors({
@@ -16,12 +18,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 3000;
 
-const sequelize = require('./util/database');
+const sequelize = require('./util/database.js');
 const expenseRouter = require('./router/expenseRouter');
 const userRouter = require('./router/userRouter');
 
 app.use(expenseRouter);
 app.use(userRouter);
+
+user.hasMany(expense);
+expense.belongsTo(user);
 
 app.get("/", (req, res) => {
     res.send("Hello, Express!");
