@@ -1,7 +1,7 @@
 const expense = require('../models/expense');
 
 exports.getExpense = (req, res, next) => {
-    expense.findAll()
+    expense.findAll() // were userId = currUser
         .then(expense => {
             res.status(200).json(expense);
         })
@@ -12,7 +12,7 @@ exports.getExpense = (req, res, next) => {
 };
 
 exports.postExpense = (req, res, next) => {
-    const { description, amount, category } = req.body;
+    const { description, amount, category } = req.body; // add userId
     expense.create({
         description: description,
         amount: amount,

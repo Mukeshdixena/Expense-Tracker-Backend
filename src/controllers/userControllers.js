@@ -1,5 +1,9 @@
 const user = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+function generateAccestoken(id, name) {
+    return jwt.sign({ userId: id, name: name }, "privetekey")
+}
 exports.getUser = (req, res, next) => {
     user.findAll()
         .then(user => {
@@ -95,7 +99,7 @@ exports.signin = async (req, res) => {
             return res.json({ success: false, message: 'Incorrect password' });
         }
 
-        res.json({ success: true, message: 'Login successful' });
+        res.json({ success: true, message: 'Login successful', token: generateAccestoken(currUser.id, currUser.name) });
     } catch (error) {
         console.error('Error during signin:', error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
