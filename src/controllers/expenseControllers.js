@@ -1,7 +1,7 @@
 const expense = require('../models/expense');
 
 exports.getExpense = (req, res, next) => {
-    expense.findAll() // were userId = currUser
+    expense.findAll({ where: { userId: req.user.id } }) // were userId = currUser
         .then(expense => {
             res.status(200).json(expense);
         })
