@@ -1,7 +1,8 @@
 const expense = require('../models/expense');
 
 exports.getExpense = (req, res, next) => {
-    expense.findAll({ where: { userId: req.user.id } }) // were userId = currUser
+    // expense.findAll({ where: { userId: req.user.id } }) // were userId = currUser
+    req.user.getExpenses()
         .then(expense => {
             res.status(200).json(expense);
         })
@@ -16,7 +17,8 @@ exports.postExpense = (req, res, next) => {
     expense.create({
         description: description,
         amount: amount,
-        category: category
+        category: category,
+        userId: req.user.id
     })
         .then(result => {
             res.status(201).json(result);
@@ -41,7 +43,10 @@ exports.deleteExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'expense not found' });
             }
-            return expense.destroy();
+            if (expense.userId === req.user.id) {
+                return expense.destroy();
+            }
+            return res.status(404).json({ message: 'not authorized' });
         })
         .then(() => {
             res.status(200).json({ message: 'expense deleted successfully' });
@@ -65,7 +70,12 @@ exports.editExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'Expense not found' });
             }
-            return expense.update({ description, amount, category });
+            console.log(expense.userId, req.user.id)
+            if (expense.userId === req.user.id) {
+
+                return expense.update({ description, amount, category });
+            }
+            return res.status(404).json({ message: 'not authorized' });
         })
         .then(updatedExpense => {
             res.status(200).json({ message: 'Expense updated successfully', expense: updatedExpense });
