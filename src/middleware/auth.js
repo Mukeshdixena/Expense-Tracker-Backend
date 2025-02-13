@@ -8,7 +8,7 @@ const authonticate = (req, res, next) => {
         const user = jwt.verify(token, 'privetekey');
         console.log("user >>>", user);
 
-        User.findByPk(user.userId)
+        User.findByPk(user.UserId)
             .then(user => {
                 req.user = user;
                 next();

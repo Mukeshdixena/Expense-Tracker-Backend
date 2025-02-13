@@ -1,7 +1,7 @@
 const expense = require('../models/expense');
 
 exports.getExpense = (req, res, next) => {
-    // expense.findAll({ where: { userId: req.user.id } }) // were userId = currUser
+    // expense.findAll({ where: { UserId: req.user.id } }) // were UserId = currUser
     req.user.getExpenses()
         .then(expense => {
             res.status(200).json(expense);
@@ -13,12 +13,13 @@ exports.getExpense = (req, res, next) => {
 };
 
 exports.postExpense = (req, res, next) => {
-    const { description, amount, category } = req.body; // add userId
+    const { description, amount, category } = req.body; // add UserId
+    console.log(req.user.id);
     expense.create({
         description: description,
         amount: amount,
         category: category,
-        userId: req.user.id
+        UserId: req.user.id
     })
         .then(result => {
             res.status(201).json(result);
@@ -43,7 +44,7 @@ exports.deleteExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'expense not found' });
             }
-            if (expense.userId === req.user.id) {
+            if (expense.UserId === req.user.id) {
                 return expense.destroy();
             }
             return res.status(404).json({ message: 'not authorized' });
@@ -70,8 +71,8 @@ exports.editExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'Expense not found' });
             }
-            console.log(expense.userId, req.user.id)
-            if (expense.userId === req.user.id) {
+            console.log(expense.UserId, req.user.id)
+            if (expense.UserId === req.user.id) {
 
                 return expense.update({ description, amount, category });
             }

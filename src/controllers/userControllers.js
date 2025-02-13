@@ -2,7 +2,7 @@ const user = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 function generateAccestoken(id, name) {
-    return jwt.sign({ userId: id, name: name }, "privetekey")
+    return jwt.sign({ UserId: id, name: name }, "privetekey")
 }
 exports.getUser = (req, res, next) => {
     user.findAll()
@@ -36,15 +36,15 @@ exports.postUser = async (req, res, next) => {
     }
 };
 exports.deleteUser = (req, res, next) => {
-    const { userId } = req.params;
+    const { UserId } = req.params;
 
-    if (!userId) {
-        return res.status(400).json({ message: 'userId is required' });
+    if (!UserId) {
+        return res.status(400).json({ message: 'UserId is required' });
     }
 
-    console.log('Received userId:', userId);
+    console.log('Received UserId:', UserId);
 
-    user.findByPk(userId)
+    user.findByPk(UserId)
         .then(user => {
             if (!user) {
                 return res.status(404).json({ message: 'user not found' });
