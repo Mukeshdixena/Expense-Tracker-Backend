@@ -21,9 +21,11 @@ const PORT = 3000;
 const sequelize = require('./util/database.js');
 const expenseRouter = require('./router/expenseRouter');
 const userRouter = require('./router/userRouter');
+const paymentService = require('./router/paymentService.js');
 
 app.use(expenseRouter);
 app.use(userRouter);
+app.use(paymentService);
 
 user.hasMany(expense);
 expense.belongsTo(user);
