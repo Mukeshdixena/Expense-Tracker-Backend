@@ -8,6 +8,7 @@ Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 let orderId;
 exports.createOrder = (req, res, next) => {
     orderId = `order_${Date.now()}`;
+    console.log(orderId);
     var request = {
         "order_amount": 1.00,
         "order_currency": "INR",
@@ -17,15 +18,14 @@ exports.createOrder = (req, res, next) => {
             "customer_phone": "8474090589"
         },
         "order_meta": {
-            "return_url": `http://localhost:3000/payment/paymentStatus/${orderId}`,
+            "return_url": `http://127.0.0.1:5500/ExpenceTracker/home.html?orderId=${orderId}`,
             "notify_url": "https://www.cashfree.com/devstudio/preview/pg/webhooks/97521047",
             "payment_methods": "cc,dc,upi"
         },
-        "order_expiry_time": "2025-02-19T08:13:42.686Z"
     };
 
     Cashfree.PGCreateOrder("2023-08-01", request).then((response) => {
-        // console.log('Order created successfully:', response.data);
+        console.log('Order created successfully:', response.data);
         res.status(201).json(response.data.payment_session_id);
         // return response.data;
     }).catch((error) => {

@@ -14,6 +14,20 @@ exports.getUser = (req, res, next) => {
             res.status(500).json({ message: 'Something went wrong!' });
         });
 };
+exports.getUserById = (req, res, next) => {
+    console.log('User ID:', req.user?.id);
+    user.findByPk(req.user.id)
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json(user);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ message: 'Something went wrong!' });
+        });
+};
 
 exports.postUser = async (req, res, next) => {
     try {
@@ -34,6 +48,27 @@ exports.postUser = async (req, res, next) => {
         console.error(err);
         res.status(500).json({ message: 'Something went wrong!' });
     }
+};
+exports.postPremium = async (req, res, next) => {
+
+    const { isPremiumMember } = req.body;
+
+
+    user.findByPk(req.user.id)
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({ message: 'Expense not found' });
+            }
+            console.log(user.UserId)
+            return user.update({ isPremiumMember });
+        })
+        .then(updatedExpense => {
+            res.status(200).json({ message: 'Expense updated successfully', user: updatedExpense });
+        })
+        .catch(err => {
+            console.error('Error updating user:', err);
+            res.status(500).json({ message: 'Error updating user', error: err });
+        });
 };
 exports.deleteUser = (req, res, next) => {
     const { UserId } = req.params;
