@@ -33,7 +33,12 @@ const User = sequelize.define(
             type: DataTypes.BOOLEAN,
             defaultValue: false, // Default value for new users
         },
+        totalAmount: {
+            type: Sequelize.DOUBLE,
+            allowNull: false,
+        },
     },
+
     {
         tableName: 'users', // Explicitly set table name to avoid pluralization issues
         timestamps: true, // Adds createdAt & updatedAt fields automatically

@@ -46,6 +46,15 @@ exports.getUserById = async (req, res, next) => {
     res.status(200).json(thisUser);
 
 };
+exports.getUserTotalAmount = async (req, res, next) => {
+    const thisUser = await user.findByPk(req.user.id)
+
+    if (!thisUser) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(thisUser);
+
+};
 
 exports.postUser = async (req, res, next) => {
     try {
@@ -58,6 +67,7 @@ exports.postUser = async (req, res, next) => {
         const newUser = await user.create({
             username,
             email,
+            totalAmount: 0,
             password: hashedPassword
         });
 
