@@ -1,5 +1,6 @@
 const user = require('../models/user');
 const expense = require('../models/expense');
+const { Sequelize } = require('sequelize'); // Ensure Sequelize is imported
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -14,21 +15,28 @@ exports.getUser = async (req, res, next) => {
     res.status(200).json(thisUsers);
 };
 exports.getLeaderBoad = async (req, res, next) => {
-    const users = await user.findAll();
-    const leaderboard = await Promise.all(users.map(async (user) => {
+    try {
+        const users = await user.findAll({
+            attributes: ['id', 'username', 'isPremiumMember',
+                [Sequelize.fn('COALESCE', Sequelize.fn('SUM', Sequelize.col('Expenses.amount')), 0), 'totalAmount']
+            ],
+            include: [
+                {
+                    model: expense,
+                    attributes: [],
+                },
+            ],
+            group: ['user.id'],
+            order: [[Sequelize.literal('totalAmount'), 'DESC']],
+        });
 
-        const expenses = await user.getExpenses();
-        const totalAmount = expenses.reduce((total, item) => total + item.amount, 0);
-        return {
-            user,
-            totalAmount
-        };
-    }));
-
-    leaderboard.sort((a, b) => b.totalAmount - a.totalAmount);
-    res.status(200).json(leaderboard);
-
+        res.status(200).json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
+
 exports.getUserById = async (req, res, next) => {
     const thisUser = await user.findByPk(req.user.id)
 
