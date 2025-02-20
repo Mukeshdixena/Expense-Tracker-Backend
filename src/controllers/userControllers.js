@@ -15,15 +15,18 @@ exports.getUser = async (req, res, next) => {
 };
 exports.getLeaderBoad = async (req, res, next) => {
     const users = await user.findAll();
-    const data = await Promise.all(users.map(async (user) => {
+    const leaderboard = await Promise.all(users.map(async (user) => {
+
         const expenses = await user.getExpenses();
+        const totalAmount = expenses.reduce((total, item) => total + item.amount, 0);
         return {
             user,
-            expenses
+            totalAmount
         };
     }));
 
-    res.status(200).json(data);
+    leaderboard.sort((a, b) => b.totalAmount - a.totalAmount);
+    res.status(200).json(leaderboard);
 
 };
 exports.getUserById = async (req, res, next) => {
