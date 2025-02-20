@@ -1,31 +1,39 @@
 const user = require('../models/user');
+const expense = require('../models/expense');
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 function generateAccestoken(id, name) {
     return jwt.sign({ UserId: id, name: name }, "privetekey")
 }
-exports.getUser = (req, res, next) => {
-    user.findAll()
-        .then(user => {
-            res.status(200).json(user);
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ message: 'Something went wrong!' });
-        });
+exports.getUser = async (req, res, next) => {
+    const thisUsers = await user.findAll()
+    if (!thisUsers) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(thisUsers);
 };
-exports.getUserById = (req, res, next) => {
-    user.findByPk(req.user.id)
-        .then(user => {
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            res.status(200).json(user);
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ message: 'Something went wrong!' });
-        });
+exports.getLeaderBoad = async (req, res, next) => {
+    const users = await user.findAll();
+    const data = await Promise.all(users.map(async (user) => {
+        const expenses = await user.getExpenses();
+        return {
+            user,
+            expenses
+        };
+    }));
+
+    res.status(200).json(data);
+
+};
+exports.getUserById = async (req, res, next) => {
+    const thisUser = await user.findByPk(req.user.id)
+
+    if (!thisUser) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(thisUser);
+
 };
 
 exports.postUser = async (req, res, next) => {
