@@ -15,7 +15,6 @@ exports.getUser = (req, res, next) => {
         });
 };
 exports.getUserById = (req, res, next) => {
-    console.log('User ID:', req.user?.id);
     user.findByPk(req.user.id)
         .then(user => {
             if (!user) {
@@ -77,7 +76,6 @@ exports.deleteUser = (req, res, next) => {
         return res.status(400).json({ message: 'UserId is required' });
     }
 
-    console.log('Received UserId:', UserId);
 
     user.findByPk(UserId)
         .then(user => {

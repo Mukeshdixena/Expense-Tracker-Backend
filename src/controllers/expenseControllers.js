@@ -14,7 +14,6 @@ exports.getExpense = (req, res, next) => {
 
 exports.postExpense = (req, res, next) => {
     const { description, amount, category } = req.body; // add UserId
-    console.log(req.user.id);
     expense.create({
         description: description,
         amount: amount,
@@ -37,7 +36,6 @@ exports.deleteExpense = (req, res, next) => {
         return res.status(400).json({ message: 'expenseId is required' });
     }
 
-    console.log('Received expenseId:', expenseId);
 
     expense.findByPk(expenseId)
         .then(expense => {
@@ -71,7 +69,6 @@ exports.editExpense = (req, res, next) => {
             if (!expense) {
                 return res.status(404).json({ message: 'Expense not found' });
             }
-            console.log(expense.UserId, req.user.id)
             if (expense.UserId === req.user.id) {
 
                 return expense.update({ description, amount, category });

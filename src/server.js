@@ -42,4 +42,4 @@ sequelize
             console.log(`Server is running on http://localhost:${PORT}`);
         });
     })
-    .catch(err => console.log(err));
+    .catch(err => console.error(err));
