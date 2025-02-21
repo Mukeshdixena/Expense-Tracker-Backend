@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get('/service/createOrder', cashfreeService.createOrder);
 router.get('/payment/paymentStatus/:orderId', cashfreeService.paymentStatus);
+router.post('/forgetPassword/postOtpMail', cashfreeService.postOtpMail);
+router.post('/forgetPassword/verifyOtp', cashfreeService.verifyOtp);
 // router.get('/service/orderId', cashfreeService.orderId);
 // router.post('/api/postExpense', userAuth.authonticate, cashfreeService.postExpense);
 // router.delete('/api/deleteExpense/:expenseId', userAuth.authonticate, cashfreeService.deleteExpense);

@@ -1,10 +1,25 @@
 const { Cashfree } = require("cashfree-pg");
 require('dotenv').config();
+const express = require("express");
+const sib = require("sib-api-v3-sdk");
+const crypto = require("crypto");
 
 
 Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
 Cashfree.XClientSecret = process.env.CASHFREE_CLIENT_SECRET;
 Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+
+
+const client = sib.ApiClient.instance;
+const apiKey = client.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;
+
+const transEmailApi = new sib.TransactionalEmailsApi();
+
+const otpStore = {}; // Temporary storage for OTPs
+
+// Generate a 6-digit OTP
+const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 
 
 exports.createOrder = async (req, res, next) => {
@@ -58,4 +73,48 @@ exports.paymentStatus = async (req, res, next) => {
         console.error("Error fetching payment status:", error.response?.data || error);
         res.status(500).json({ error: "Failed to fetch payment status" });
     }
+};
+exports.postOtpMail = async (req, res, next) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+
+    const otp = generateOTP();
+    otpStore[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP valid for 5 mins
+
+    const emailData = {
+        sender: { email: process.env.EMAIL_SENDER, name: "Your Service" },
+        to: [{ email }],
+        subject: "Your OTP Code",
+        htmlContent: `<p>Your OTP code is <strong>${otp}</strong>. It is valid for 5 minutes.</p>`,
+    };
+
+    try {
+        await transEmailApi.sendTransacEmail(emailData);
+        res.json({ message: "OTP sent successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to send OTP" });
+    }
+
+};
+
+exports.verifyOtp = async (req, res) => {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+        return res.status(400).json({ result: false, message: "Email and OTP are required", email, otp, otpStore });
+    }
+
+    const storedOtp = otpStore[email];
+    if (!storedOtp) {
+        return res.status(400).json({ result: false, message: "OTP expired or not found", email, otp, otpStore });
+    }
+
+    if (storedOtp.otp !== otp) {
+        return res.status(400).json({ result: false, message: "Invalid OTP", email, otp, otpStore });
+    }
+
+    delete otpStore[email]; // Remove OTP after successful verification
+    res.json({ result: true, message: "OTP verified successfully", email, otp, otpStore });
 };
