@@ -1,9 +1,8 @@
 const { Cashfree } = require("cashfree-pg");
 require('dotenv').config();
-const express = require("express");
 const sib = require("sib-api-v3-sdk");
 const crypto = require("crypto");
-
+const user = require('../models/user');
 
 Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID;
 Cashfree.XClientSecret = process.env.CASHFREE_CLIENT_SECRET;
@@ -77,7 +76,12 @@ exports.paymentStatus = async (req, res, next) => {
 exports.postOtpMail = async (req, res, next) => {
     const { email } = req.body;
     if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+        return res.status(400).json({ sent: false, message: "Email is required" });
+    }
+
+    const currUser = await user.findOne({ where: { email } });
+    if (!currUser) {
+        return res.json({ sent: false, message: 'Email not found' });
     }
 
     const otp = generateOTP();
@@ -92,10 +96,10 @@ exports.postOtpMail = async (req, res, next) => {
 
     try {
         await transEmailApi.sendTransacEmail(emailData);
-        res.json({ message: "OTP sent successfully" });
+        res.json({ sent: true, message: "OTP sent successfully" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Failed to send OTP" });
+        res.status(500).json({ sent: false, message: "Failed to send OTP" });
     }
 
 };

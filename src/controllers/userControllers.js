@@ -77,6 +77,29 @@ exports.postUser = async (req, res, next) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 };
+exports.postUserPass = async (req, res, next) => {
+    try {
+        const { emailId, newPassword } = req.body;
+
+        console.log(emailId, newPassword);
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        const currUser = await user.findOne({ where: { email: emailId } });
+
+        if (!currUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        await currUser.update({ password: hashedPassword });
+        console.log(hashedPassword);
+        res.status(200).json({ message: 'Password updated successfully' });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Something went wrong!' });
+    }
+};
 exports.postPremium = async (req, res, next) => {
 
     const { isPremiumMember } = req.body;
@@ -167,3 +190,4 @@ exports.signin = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
+
