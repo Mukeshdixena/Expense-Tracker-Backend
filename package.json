@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Mukeshdixena/Expense-Tracker-Backend#readme",
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^2.4.3",
     "cashfree-pg": "^4.3.10",
     "cors": "^2.8.5",
