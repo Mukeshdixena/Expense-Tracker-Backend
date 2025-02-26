@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const user = require('./models/user.js')
 const expense = require('./models/expense.js')
+const ExpenseDownload = require('./models/expensesDownload.js')
 require('dotenv').config();
 
 
@@ -23,13 +24,17 @@ const sequelize = require('./util/database.js');
 const expenseRouter = require('./router/expenseRouter');
 const userRouter = require('./router/userRouter');
 const paymentService = require('./router/paymentService.js');
+const expenseDownloadRouter = require("./router/expenseDownloadRouter.js");
 
 app.use(expenseRouter);
 app.use(userRouter);
 app.use(paymentService);
+app.use(expenseDownloadRouter);
 
 user.hasMany(expense);
 expense.belongsTo(user);
+user.hasMany(ExpenseDownload);
+ExpenseDownload.belongsTo(user);
 
 app.get("/", (req, res) => {
     res.send("Hello, Express!");

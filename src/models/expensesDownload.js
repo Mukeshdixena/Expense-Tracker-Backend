@@ -1,5 +1,4 @@
 const { Sequelize } = require('sequelize');
-
 const sequelize = require('../util/database.js');
 
 const ExpenseDownload = sequelize.define(
@@ -12,10 +11,19 @@ const ExpenseDownload = sequelize.define(
             unique: true,
             allowNull: false,
         },
-        FileUrl: {
+        fileUrl: {
             type: Sequelize.STRING,
             allowNull: false,
-        }
+        },
+        UserId: {  // Explicitly defining the foreign key
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Users', // Make sure the table name matches your `User` model
+                key: 'id',
+            },
+            onDelete: 'CASCADE', // Delete downloads if the user is deleted
+        },
     }
 );
 

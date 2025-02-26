@@ -2,35 +2,46 @@ const expense = require('../models/expense');
 const user = require('../models/user');
 const sequelize = require('../util/database');
 const { uploadToS3 } = require('../service/awsS3Service');
+const ExpenseDownload = require('../models/expensesDownload.js');
 
-
-
+// ✅ Get Expenses
 exports.getExpense = async (req, res, next) => {
     try {
-        const expenses = await req.user.getExpenses();
+        const expenses = await expense.findAll({ where: { UserId: req.user.id } });
         res.status(200).json(expenses);
     } catch (error) {
-        console.error(error);
+        console.error("Error fetching expenses:", error);
         res.status(500).json({ message: 'Something went wrong!' });
     }
 };
 
+// ✅ Generate Expense File
 exports.getExpenseFile = async (req, res, next) => {
     try {
-        const expenses = await req.user.getExpenses();
+        const expenses = await expense.findAll({ where: { UserId: req.user.id } });
+
+        if (!expenses.length) {
+            return res.status(404).json({ message: 'No expenses found', success: false });
+        }
+
         const stringifiedExpenses = JSON.stringify(expenses, null, 2);
         const userId = req.user.id;
         const fileName = `Expense_${userId}_${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
 
         const fileUrl = await uploadToS3(stringifiedExpenses, fileName);
+        if (!fileUrl) throw new Error("Failed to upload file to S3");
+
+        console.log({ FileUrl: fileUrl, UserId: userId });
+        await ExpenseDownload.create({ fileUrl, UserId: userId });
 
         res.status(200).json({ fileUrl, success: true });
     } catch (error) {
         console.error("Error generating expense file:", error);
-        res.status(500).json({ message: 'Something went wrong!' });
+        res.status(500).json({ message: 'Something went wrong!', success: false });
     }
 };
 
+// ✅ Create Expense with Transaction
 exports.postExpense = async (req, res, next) => {
     const { description, amount, category } = req.body;
     const t = await sequelize.transaction();
@@ -39,7 +50,7 @@ exports.postExpense = async (req, res, next) => {
         const currUser = await user.findByPk(req.user.id, { transaction: t });
         if (!currUser) throw new Error('User not found');
 
-        const totalAmount = parseFloat(currUser.totalAmount) + parseFloat(amount);
+        const totalAmount = parseFloat(currUser.totalAmount || 0) + parseFloat(amount);
         await currUser.update({ totalAmount }, { transaction: t });
 
         const result = await expense.create({
@@ -58,6 +69,7 @@ exports.postExpense = async (req, res, next) => {
     }
 };
 
+// ✅ Delete Expense with Transaction
 exports.deleteExpense = async (req, res, next) => {
     const { expenseId } = req.params;
     if (!expenseId) return res.status(400).json({ message: 'expenseId is required' });
@@ -76,8 +88,8 @@ exports.deleteExpense = async (req, res, next) => {
         const currUser = await user.findByPk(req.user.id, { transaction: t });
         if (!currUser) throw new Error('User not found');
 
-        const totalAmount = parseFloat(currUser.totalAmount) - parseFloat(currExpense.amount);
-        await currUser.update({ totalAmount }, { transaction: t });
+        const amountToDeduct = parseFloat(currExpense.amount || 0);
+        await currUser.update({ totalAmount: currUser.totalAmount - amountToDeduct }, { transaction: t });
 
         await currExpense.destroy({ transaction: t });
 
@@ -90,6 +102,7 @@ exports.deleteExpense = async (req, res, next) => {
     }
 };
 
+// ✅ Edit Expense with Transaction
 exports.editExpense = async (req, res, next) => {
     const { editId } = req.params;
     const { description, amount, category } = req.body;
@@ -109,11 +122,12 @@ exports.editExpense = async (req, res, next) => {
         const currUser = await user.findByPk(req.user.id, { transaction: t });
         if (!currUser) throw new Error('User not found');
 
-        const totalAmount = parseFloat(currUser.totalAmount) - parseFloat(currExpense.amount) + parseFloat(amount);
+        const updatedAmount = amount ? parseFloat(amount) : currExpense.amount;
+        const totalAmount = parseFloat(currUser.totalAmount || 0) - parseFloat(currExpense.amount) + updatedAmount;
         await currUser.update({ totalAmount }, { transaction: t });
 
         await currExpense.update(
-            { description, amount: parseFloat(amount), category },
+            { description, amount: updatedAmount, category },
             { transaction: t }
         );
 
