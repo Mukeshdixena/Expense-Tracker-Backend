@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const user = require('./models/user.js')
 const expense = require('./models/expense.js')
+require('dotenv').config();
 
 
 app.use(cors({
