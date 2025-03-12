@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const user = require('./models/user.js')
 const expense = require('./models/expense.js')
+const Passwords = require('./models/passwords.js')
 const ExpenseDownload = require('./models/expensesDownload.js')
 require('dotenv').config();
 
@@ -33,6 +34,10 @@ app.use(expenseDownloadRouter);
 
 user.hasMany(expense);
 expense.belongsTo(user);
+
+user.hasMany(Passwords);
+Passwords.belongsTo(user);
+
 user.hasMany(ExpenseDownload);
 ExpenseDownload.belongsTo(user);
 

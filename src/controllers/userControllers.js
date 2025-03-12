@@ -1,11 +1,12 @@
 const user = require('../models/user');
+const Password = require('../models/passwords');
 const expense = require('../models/expense');
 const { Sequelize } = require('sequelize'); // Ensure Sequelize is imported
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 function generateAccestoken(id, name) {
-    return jwt.sign({ UserId: id, name: name }, "privetekey")
+    return jwt.sign({ UserId: id, name: name }, process.env.PRIVET_KEY)
 }
 exports.getUser = async (req, res, next) => {
     const thisUsers = await user.findAll()
@@ -70,7 +71,7 @@ exports.postUser = async (req, res, next) => {
             totalAmount: 0,
             password: hashedPassword
         });
-
+        await Password.create({ hashedPassword: hashedPassword, UserId: newUser.id });
         res.status(201).json(newUser);
     } catch (err) {
         console.error(err);
@@ -91,8 +92,18 @@ exports.postUserPass = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        const currUserPass = await Password.findAll({ where: { UserId: currUser.id } });
+
+        for (const currPass of currUserPass) {
+            const isMatch = await bcrypt.compare(newPassword, currPass.hashedPassword);
+            if (isMatch) {
+                return res.json({ success: false, message: 'This password already exists, please choose another' });
+            }
+        }
+
+        await Password.create({ hashedPassword, UserId: currUser.id });
         await currUser.update({ password: hashedPassword });
-        console.log(hashedPassword);
+
         res.status(200).json({ message: 'Password updated successfully' });
 
     } catch (err) {
@@ -100,6 +111,7 @@ exports.postUserPass = async (req, res, next) => {
         res.status(500).json({ message: 'Something went wrong!' });
     }
 };
+
 exports.postPremium = async (req, res, next) => {
 
     const { isPremiumMember } = req.body;
