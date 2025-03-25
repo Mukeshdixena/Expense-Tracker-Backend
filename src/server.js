@@ -42,7 +42,7 @@ user.hasMany(ExpenseDownload);
 ExpenseDownload.belongsTo(user);
 
 app.get("/", (req, res) => {
-    res.send("Hello, Express!");
+    res.send("jenkins Development, Express!");
 });
 
 sequelize

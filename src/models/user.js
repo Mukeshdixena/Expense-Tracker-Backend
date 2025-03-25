@@ -38,11 +38,6 @@ const User = sequelize.define(
             allowNull: false,
         },
     },
-
-    {
-        tableName: 'users', // Explicitly set table name to avoid pluralization issues
-        timestamps: true, // Adds createdAt & updatedAt fields automatically
-    }
 );
 
 module.exports = User;
