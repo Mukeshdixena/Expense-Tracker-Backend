@@ -2,10 +2,10 @@ const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
-const user = require('./models/user.js')
-const expense = require('./models/expense.js')
-const Passwords = require('./models/passwords.js')
-const ExpenseDownload = require('./models/expensesDownload.js')
+const user = require('./src/models/user.js')
+const expense = require('./src/models/expense.js')
+const Passwords = require('./src/models/passwords.js')
+const ExpenseDownload = require('./src/models/expensesDownload.js')
 require('dotenv').config();
 
 
@@ -21,11 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 3000;
 
-const sequelize = require('./util/database.js');
-const expenseRouter = require('./router/expenseRouter');
-const userRouter = require('./router/userRouter');
-const paymentService = require('./router/paymentService.js');
-const expenseDownloadRouter = require("./router/expenseDownloadRouter.js");
+const sequelize = require('./src/util/database.js');
+const expenseRouter = require('./src/router/expenseRouter.js');
+const userRouter = require('./src/router/userRouter.js');
+const paymentService = require('./src/router/paymentService.js');
+const expenseDownloadRouter = require("./src/router/expenseDownloadRouter.js");
 
 app.use(expenseRouter);
 app.use(userRouter);
