@@ -4,8 +4,8 @@ const userAuth = require('../middleware/auth.js');
 
 const router = express.Router();
 
-router.get('/api/getExpenseDownload', userAuth.authonticate, expenseDownloadController.getExpenseDownload);
-router.post('/api/postExpenseDownload', userAuth.authonticate, expenseDownloadController.postExpenseDownload);
-router.delete('/api/deleteExpenseDownload/:expenseDownloadId', userAuth.authonticate, expenseDownloadController.deleteExpenseDownload);
+router.get('/api/getExpenseDownload', userAuth.authenticate, expenseDownloadController.getExpenseDownload);
+router.post('/api/postExpenseDownload', userAuth.authenticate, expenseDownloadController.postExpenseDownload);
+router.delete('/api/deleteExpenseDownload/:expenseDownloadId', userAuth.authenticate, expenseDownloadController.deleteExpenseDownload);
 
 module.exports = router;

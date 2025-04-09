@@ -15,9 +15,8 @@ apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const transEmailApi = new sib.TransactionalEmailsApi();
 
-const otpStore = {}; // Temporary storage for OTPs
+const otpStore = {};
 
-// Generate a 6-digit OTP
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 
 
@@ -79,13 +78,13 @@ exports.postOtpMail = async (req, res, next) => {
         return res.status(400).json({ sent: false, message: "Email is required" });
     }
 
-    const currUser = await user.findOne({ where: { email } });
+    const currUser = await user.findOne({ email });
     if (!currUser) {
         return res.json({ sent: false, message: 'Email not found' });
     }
 
     const otp = generateOTP();
-    otpStore[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP valid for 5 mins
+    otpStore[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
     const emailData = {
         sender: { email: process.env.EMAIL_SENDER, name: "Your Service" },
@@ -101,7 +100,6 @@ exports.postOtpMail = async (req, res, next) => {
         console.error(error);
         res.status(500).json({ sent: false, message: "Failed to send OTP" });
     }
-
 };
 
 exports.verifyOtp = async (req, res) => {
@@ -119,6 +117,6 @@ exports.verifyOtp = async (req, res) => {
         return res.status(400).json({ result: false, message: "Invalid OTP", email, otp, otpStore });
     }
 
-    delete otpStore[email]; // Remove OTP after successful verification
+    delete otpStore[email];
     res.json({ result: true, message: "OTP verified successfully", email, otp, otpStore });
 };

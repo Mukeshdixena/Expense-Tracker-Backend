@@ -1,13 +1,11 @@
-const expense = require('../models/expense');
-const user = require('../models/user');
-const sequelize = require('../util/database');
+const Expense = require('../models/expense');
+const User = require('../models/user');
 const { uploadToS3 } = require('../service/awsS3Service');
-const ExpenseDownload = require('../models/expensesDownload.js');
+const ExpenseDownload = require('../models/expensesDownload');
 
-// ✅ Get Expenses
 exports.getExpense = async (req, res, next) => {
     try {
-        const expenses = await expense.findAll({ where: { UserId: req.user.id } });
+        const expenses = await Expense.find({ userId: req.user._id });
         res.status(200).json(expenses);
     } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -15,24 +13,22 @@ exports.getExpense = async (req, res, next) => {
     }
 };
 
-// ✅ Generate Expense File
 exports.getExpenseFile = async (req, res, next) => {
     try {
-        const expenses = await expense.findAll({ where: { UserId: req.user.id } });
+        const expenses = await Expense.find({ userId: req.user._id });
 
         if (!expenses.length) {
             return res.status(404).json({ message: 'No expenses found', success: false });
         }
 
         const stringifiedExpenses = JSON.stringify(expenses, null, 2);
-        const userId = req.user.id;
+        const userId = req.user._id.toString();
         const fileName = `Expense_${userId}_${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
 
         const fileUrl = await uploadToS3(stringifiedExpenses, fileName);
         if (!fileUrl) throw new Error("Failed to upload file to S3");
 
-        console.log({ FileUrl: fileUrl, UserId: userId });
-        await ExpenseDownload.create({ fileUrl, UserId: userId });
+        await ExpenseDownload.create({ fileUrl, userId });
 
         res.status(200).json({ fileUrl, success: true });
     } catch (error) {
@@ -41,101 +37,87 @@ exports.getExpenseFile = async (req, res, next) => {
     }
 };
 
-// ✅ Create Expense with Transaction
 exports.postExpense = async (req, res, next) => {
     const { description, amount, category } = req.body;
-    const t = await sequelize.transaction();
 
     try {
-        const currUser = await user.findByPk(req.user.id, { transaction: t });
-        if (!currUser) throw new Error('User not found');
+        const user = await User.findById(req.user._id);
+        if (!user) throw new Error('User not found');
 
-        const totalAmount = parseFloat(currUser.totalAmount || 0) + parseFloat(amount);
-        await currUser.update({ totalAmount }, { transaction: t });
-
-        const result = await expense.create({
+        const expense = new Expense({
             description,
             amount: parseFloat(amount),
             category,
-            UserId: req.user.id
-        }, { transaction: t });
+            userId: req.user._id
+        });
+        await expense.save();
 
-        await t.commit();
-        res.status(201).json(result);
+        user.totalAmount = (user.totalAmount || 0) + parseFloat(amount);
+        await user.save();
+
+        res.status(201).json(expense);
     } catch (error) {
-        await t.rollback();
         console.error("Error creating expense:", error);
-        res.status(500).json({ message: 'Transaction failed' });
+        res.status(500).json({ message: 'Failed to create expense' });
     }
 };
 
-// ✅ Delete Expense with Transaction
 exports.deleteExpense = async (req, res, next) => {
     const { expenseId } = req.params;
     if (!expenseId) return res.status(400).json({ message: 'expenseId is required' });
 
-    const t = await sequelize.transaction();
-
     try {
-        const currExpense = await expense.findByPk(expenseId, { transaction: t });
-        if (!currExpense) return res.status(404).json({ message: 'Expense not found' });
+        const expense = await Expense.findById(expenseId);
+        if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
-        if (currExpense.UserId !== req.user.id) {
-            await t.rollback();
+        if (expense.userId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
-        const currUser = await user.findByPk(req.user.id, { transaction: t });
-        if (!currUser) throw new Error('User not found');
+        const user = await User.findById(req.user._id);
+        if (!user) throw new Error('User not found');
 
-        const amountToDeduct = parseFloat(currExpense.amount || 0);
-        await currUser.update({ totalAmount: currUser.totalAmount - amountToDeduct }, { transaction: t });
+        const amountToDeduct = parseFloat(expense.amount || 0);
+        user.totalAmount = (user.totalAmount || 0) - amountToDeduct;
+        await user.save();
 
-        await currExpense.destroy({ transaction: t });
+        await expense.deleteOne();
 
-        await t.commit();
         res.status(200).json({ message: 'Expense deleted successfully' });
     } catch (error) {
-        await t.rollback();
         console.error("Error deleting expense:", error);
-        res.status(500).json({ message: 'Transaction failed' });
+        res.status(500).json({ message: 'Failed to delete expense' });
     }
 };
 
-// ✅ Edit Expense with Transaction
 exports.editExpense = async (req, res, next) => {
     const { editId } = req.params;
     const { description, amount, category } = req.body;
     if (!editId) return res.status(400).json({ message: 'editId is required' });
 
-    const t = await sequelize.transaction();
-
     try {
-        const currExpense = await expense.findByPk(editId, { transaction: t });
-        if (!currExpense) return res.status(404).json({ message: 'Expense not found' });
+        const expense = await Expense.findById(editId);
+        if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
-        if (currExpense.UserId !== req.user.id) {
-            await t.rollback();
+        if (expense.userId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
-        const currUser = await user.findByPk(req.user.id, { transaction: t });
-        if (!currUser) throw new Error('User not found');
+        const user = await User.findById(req.user._id);
+        if (!user) throw new Error('User not found');
 
-        const updatedAmount = amount ? parseFloat(amount) : currExpense.amount;
-        const totalAmount = parseFloat(currUser.totalAmount || 0) - parseFloat(currExpense.amount) + updatedAmount;
-        await currUser.update({ totalAmount }, { transaction: t });
+        const updatedAmount = amount ? parseFloat(amount) : expense.amount;
+        user.totalAmount = (user.totalAmount || 0) - parseFloat(expense.amount) + updatedAmount;
+        await user.save();
 
-        await currExpense.update(
-            { description, amount: updatedAmount, category },
-            { transaction: t }
-        );
+        expense.description = description;
+        expense.amount = updatedAmount;
+        expense.category = category;
+        await expense.save();
 
-        await t.commit();
-        res.status(200).json({ message: 'Expense updated successfully', expense: currExpense });
+        res.status(200).json({ message: 'Expense updated successfully', expense });
     } catch (error) {
-        await t.rollback();
         console.error("Error updating expense:", error);
-        res.status(500).json({ message: 'Transaction failed' });
+        res.status(500).json({ message: 'Failed to update expense' });
     }
 };

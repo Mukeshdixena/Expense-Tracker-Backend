@@ -1,21 +1,21 @@
-const { Sequelize } = require('sequelize');
-const sequelize = require('../util/database.js');
+const mongoose = require('mongoose');
 
-const Passwords = sequelize.define(
-    'Passwords',
+const passwordSchema = new mongoose.Schema(
     {
-        id: {
-            type: Sequelize.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            unique: true,
-            allowNull: false,
-        },
         hashedPassword: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        }
+            type: String,
+            required: true,
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+        collection: 'passwords',
     }
 );
 
-module.exports = Passwords;
+module.exports = mongoose.model('Password', passwordSchema);
