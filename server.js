@@ -10,7 +10,6 @@ const userRouter = require('./src/router/userRouter.js');
 const paymentService = require('./src/router/paymentService.js');
 const expenseDownloadRouter = require("./src/router/expenseDownloadRouter.js");
 
-const User = require('./src/models/user.js');
 
 app.use(cors({
     origin: '*',
