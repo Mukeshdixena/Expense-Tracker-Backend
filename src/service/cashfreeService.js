@@ -1,5 +1,5 @@
 const { Cashfree } = require("cashfree-pg");
-require('dotenv').config();
+
 const sib = require("sib-api-v3-sdk");
 const crypto = require("crypto");
 const user = require('../models/user');

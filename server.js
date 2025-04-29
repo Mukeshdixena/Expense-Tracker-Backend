@@ -1,23 +1,26 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require('cors');
+const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
 const user = require('./src/models/user.js')
 const expense = require('./src/models/expense.js')
 const Passwords = require('./src/models/passwords.js')
 const ExpenseDownload = require('./src/models/expensesDownload.js')
-require('dotenv').config();
 
 
 app.use(cors({
-    origin: '*',  // Allows all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allows all standard methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Include authorization if needed
-    credentials: true // Allows credentials (cookies, authorization headers)
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'src/view')));
+
 
 const PORT = process.env.PORT || 3000;
 
@@ -41,8 +44,11 @@ Passwords.belongsTo(user);
 user.hasMany(ExpenseDownload);
 ExpenseDownload.belongsTo(user);
 
-app.get("/", (req, res) => {
+app.get("/test", (req, res) => {
     res.send("Hello, Express!");
+});
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src/view', 'index.html'));
 });
 
 sequelize

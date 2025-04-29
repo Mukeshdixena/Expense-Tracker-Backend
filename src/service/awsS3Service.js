@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-require('dotenv').config();
+
 
 
 const s3 = new AWS.S3({
