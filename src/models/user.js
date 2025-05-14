@@ -19,29 +19,24 @@ const User = sequelize.define(
             allowNull: false,
             unique: true,
             validate: {
-                isEmail: true, // Ensures a valid email format
+                isEmail: true,
             },
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
-                len: [6, 255], // Ensures password length is at least 6 characters
+                len: [6, 255],
             },
         },
         isPremiumMember: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false, // Default value for new users
+            defaultValue: false,
         },
         totalAmount: {
             type: Sequelize.DOUBLE,
             allowNull: false,
         },
-    },
-
-    {
-        tableName: 'users', // Explicitly set table name to avoid pluralization issues
-        timestamps: true, // Adds createdAt & updatedAt fields automatically
     }
 );
 

@@ -1,7 +1,7 @@
 const user = require('../models/user');
 const Password = require('../models/passwords');
 const expense = require('../models/expense');
-const { Sequelize } = require('sequelize'); // Ensure Sequelize is imported
+const { Sequelize } = require('sequelize');
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -61,10 +61,8 @@ exports.postUser = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
         const newUser = await user.create({
             username,
             email,
@@ -190,7 +188,6 @@ exports.signin = async (req, res) => {
             return res.json({ success: false, message: 'Email not found' });
         }
 
-        // Compare password
         const isMatch = await bcrypt.compare(password, currUser.password);
         if (!isMatch) {
             return res.json({ success: false, message: 'Incorrect password' });

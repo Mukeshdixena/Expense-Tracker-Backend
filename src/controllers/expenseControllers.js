@@ -4,7 +4,6 @@ const sequelize = require('../util/database');
 const { uploadToS3 } = require('../service/awsS3Service');
 const ExpenseDownload = require('../models/expensesDownload.js');
 
-// ✅ Get Expenses
 exports.getExpense = async (req, res, next) => {
     try {
         const expenses = await expense.findAll({ where: { UserId: req.user.id } });
@@ -15,7 +14,6 @@ exports.getExpense = async (req, res, next) => {
     }
 };
 
-// ✅ Generate Expense File
 exports.getExpenseFile = async (req, res, next) => {
     try {
         const expenses = await expense.findAll({ where: { UserId: req.user.id } });
@@ -41,7 +39,6 @@ exports.getExpenseFile = async (req, res, next) => {
     }
 };
 
-// ✅ Create Expense with Transaction
 exports.postExpense = async (req, res, next) => {
     const { description, amount, category } = req.body;
     const t = await sequelize.transaction();
@@ -69,7 +66,6 @@ exports.postExpense = async (req, res, next) => {
     }
 };
 
-// ✅ Delete Expense with Transaction
 exports.deleteExpense = async (req, res, next) => {
     const { expenseId } = req.params;
     if (!expenseId) return res.status(400).json({ message: 'expenseId is required' });
@@ -102,7 +98,6 @@ exports.deleteExpense = async (req, res, next) => {
     }
 };
 
-// ✅ Edit Expense with Transaction
 exports.editExpense = async (req, res, next) => {
     const { editId } = req.params;
     const { description, amount, category } = req.body;

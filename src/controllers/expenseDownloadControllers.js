@@ -40,7 +40,6 @@ exports.deleteExpenseDownload = async (req, res, next) => {
             return res.status(400).json({ message: 'Download ID is required' });
         }
 
-        // Ensure the user object is available
         if (!req.user || !req.user.id) {
             return res.status(401).json({ message: 'Unauthorized' });
         }

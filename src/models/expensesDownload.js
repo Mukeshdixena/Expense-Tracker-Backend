@@ -15,14 +15,14 @@ const ExpenseDownload = sequelize.define(
             type: Sequelize.STRING,
             allowNull: false,
         },
-        UserId: {  // Explicitly defining the foreign key
+        UserId: {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: {
-                model: 'Users', // Make sure the table name matches your `User` model
+                model: 'Users',
                 key: 'id',
             },
-            onDelete: 'CASCADE', // Delete downloads if the user is deleted
+            onDelete: 'CASCADE',
         },
     }
 );

@@ -139,26 +139,22 @@ function addToDownloadList(id, fileUrl) {
 
     const fileName = fileUrl.split('/').pop();
 
-    // Create file link
     const fileLink = document.createElement("a");
     fileLink.href = fileUrl;
     fileLink.target = "_blank";
     fileLink.download = fileName;
     fileLink.textContent = fileName + "  ";
 
-    // Create delete button
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.classList.add("delete");
     deleteButton.addEventListener("click", () => deleteDownload(id, li));
 
-    // Append elements
     li.appendChild(fileLink);
     li.appendChild(deleteButton);
     document.getElementById("DownloadList").appendChild(li);
 }
 
-// Separate function for handling delete action
 async function deleteDownload(id, li) {
     try {
         const token = localStorage.getItem('token');
