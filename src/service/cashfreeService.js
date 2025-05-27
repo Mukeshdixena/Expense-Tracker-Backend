@@ -74,6 +74,7 @@ exports.paymentStatus = async (req, res, next) => {
 };
 exports.postOtpMail = async (req, res, next) => {
     const { email } = req.body;
+    console.log("this is email", email);
     if (!email) {
         return res.status(400).json({ sent: false, message: "Email is required" });
     }

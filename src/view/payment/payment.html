@@ -8,27 +8,83 @@
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="../config.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
 
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
+        img.banner {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        button#renderBtn {
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button#renderBtn:hover {
+            background-color: #0056b3;
+        }
+
+        .instructions {
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="row">
-        <p>Click below to open the checkout page in current tab</p>
+    <div class="container">
+        <img src="https://i0.wp.com/blogrevamp.cashfree.com/wp-content/uploads/2024/11/Checkout-One-02-2.png?fit=5000%2C3334&ssl=1"
+            alt="Cashfree Checkout Banner" class="banner">
+
+        <div class="instructions">
+            <h2>Cashfree Checkout Integration</h2>
+            <p>This demo initiates a payment of <strong>₹100</strong> using Cashfree's JavaScript SDK. Click below to
+                proceed.</p>
+        </div>
+
         <button id="renderBtn">Pay Now</button>
     </div>
+
     <script>
         const cashfree = Cashfree({
-            mode: "sandbox",
+            mode: "sandbox", // Change to "production" when going live
         });
+
         document.getElementById("renderBtn").addEventListener("click", async () => {
-            const responce = await axios.get(`${CONFIG.API_BASE_URL}/service/createOrder`);
-            console.log(responce.data);
-            let checkoutOptions = {
-                paymentSessionId: responce.data.paymentSessionId,
-                redirectTarget: "_self",
-            };
-            cashfree.checkout(checkoutOptions);
+            try {
+                const response = await axios.get(`${CONFIG.API_BASE_URL}/service/createOrder`);
+                console.log(response.data);
+
+                let checkoutOptions = {
+                    paymentSessionId: response.data.paymentSessionId,
+                    redirectTarget: "_self",
+                };
+
+                cashfree.checkout(checkoutOptions);
+            } catch (error) {
+                console.error("Error initiating payment:", error);
+                alert("Unable to initiate payment. Please try again later.");
+            }
         });
     </script>
 </body>

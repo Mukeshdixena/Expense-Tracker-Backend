@@ -17,6 +17,7 @@ async function fetchPaymentStatus(orderId) {
         if (status === 'SUCCESS') {
             const token = localStorage.getItem('token');
             await axios.patch(`${CONFIG.API_BASE_URL}/api/postPremium`, { isPremiumMember: true }, { headers: { "Authorization": token } });
+            window.location.href = "./ExpenceTracker.html";
         }
     } catch (error) {
         console.error("Error fetching payment status:", error);
@@ -41,7 +42,10 @@ async function fetchData() {
         document.getElementById("detailsList").innerHTML = "";
         console.log(response.data);
 
-        response.data.forEach(({ _id, description, amount, category }) => addToList(_id, description, amount, category));
+        response.data.forEach(({ id, description, amount, category }) => {
+            console.log({ id, description, amount, category })
+            addToList(id, description, amount, category)
+        });
         updateTotalAmount();
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -53,7 +57,7 @@ async function fetchDownloadList() {
         const response = await axios.get(`${CONFIG.API_BASE_URL}/api/getExpenseDownload`, { headers: { "Authorization": token } });
         document.getElementById("DownloadList").innerHTML = "";
 
-        response.data.forEach(({ _id, fileUrl }) => addToDownloadList(_id, fileUrl));
+        response.data.forEach(({ id, fileUrl }) => addToDownloadList(id, fileUrl));
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -110,7 +114,7 @@ async function handleSubmit(event) {
                 { description, amount, category },
                 { headers: { "Authorization": token } }
             );
-            addToList(response.data._id, description, amount, category);
+            addToList(response.data.id, description, amount, category);
         }
 
         form.reset();
