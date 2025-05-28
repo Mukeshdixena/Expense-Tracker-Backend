@@ -34,18 +34,26 @@ A full-stack web application built using **Node.js**, **Express**, **Sequelize**
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/your-username/expense-tracker.git
-cd expense-tracker
+git clone https://github.com/Mukeshdixena/Expense-Tracker-Backend
+cd Expense-Tracker-Backend
 npm install
 ```
 
 Create a `.env` file in the root directory with the following:
 
 ```env
-DB_NAME=your_database
-DB_USER=your_mysql_user
-DB_PASSWORD=your_mysql_password
-JWT_SECRET=your_jwt_secret
+CASHFREE_CLIENT_ID=
+CASHFREE_CLIENT_SECRET=
+
+BREVO_API_KEY=
+EMAIL_SENDER=
+BUCKET_NAME=
+IAM_USER_KEY=
+IAM_USER_SECRET_KEY=
+DATABASE_NAME=
+DATABASE_PASSWORD=
+DATABASE_USER=
+PRIVET_KEY=
 ```
 
 Run the app:
