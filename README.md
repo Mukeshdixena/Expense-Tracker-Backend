@@ -1,7 +1,3 @@
-Based on the screenshots of your **Expense Tracker** app built with **Node.js**, here’s a polished and professional README file you can use on GitHub or any portfolio platform:
-
----
-
 # 💸 Expense Tracker App
 
 A full-stack web application built using **Node.js**, **Express**, **Sequelize**, and **MySQL** that helps users track daily expenses, categorize spending, and upgrade to a premium membership for enhanced features.
@@ -93,6 +89,3 @@ You can test the app using Postman or browser-based UI:
 * [Sequelize ORM](https://sequelize.org/)
 * [Express.js](https://expressjs.com/)
 
----
-
-Let me know if you'd like me to turn this into a Markdown file (`README.md`) or help you deploy it somewhere!
